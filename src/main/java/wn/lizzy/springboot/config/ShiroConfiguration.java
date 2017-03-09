@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.CookieRememberMeManager;
@@ -13,6 +14,7 @@ import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 /**
  * * Shiro 配置
@@ -26,6 +28,26 @@ Apache Shiro 核心通过 Filter 来实现，就好像SpringMvc 通过DispachSer
  */
 @Configuration
 public class ShiroConfiguration {
+	
+	/**
+	 * shiro权限主管理方法。
+	 * @return
+	 */
+	@Bean
+    public SecurityManager securityManager(){
+       DefaultWebSecurityManager securityManager =  new DefaultWebSecurityManager();
+       //设置realm.
+       securityManager.setRealm(myShiroRealm());
+       
+       //注入缓存管理器;
+       securityManager.setCacheManager(ehCacheManager());//这个如果执行多次，也是同样的一个对象;
+       
+       //注入记住我管理器;
+       securityManager.setRememberMeManager(rememberMeManager());
+       
+       return securityManager;
+    }
+	
 	/**
      * ShiroFilterFactoryBean 处理拦截资源文件问题。
      * 注意：单独一个ShiroFilterFactoryBean配置是或报错的，以为在
@@ -70,20 +92,6 @@ public class ShiroConfiguration {
        return shiroFilterFactoryBean;
     }
    
- @Bean
-    public SecurityManager securityManager(){
-       DefaultWebSecurityManager securityManager =  new DefaultWebSecurityManager();
-       //设置realm.
-       securityManager.setRealm(myShiroRealm());
-       
-       //注入缓存管理器;
-       securityManager.setCacheManager(ehCacheManager());//这个如果执行多次，也是同样的一个对象;
-       
-       //注入记住我管理器;
-       securityManager.setRememberMeManager(rememberMeManager());
-       
-       return securityManager;
-    }
  /**
      * 身份认证realm;
      * (这个需要自己写，账号密码校验；权限等)
@@ -133,6 +141,8 @@ public class ShiroConfiguration {
      * @return
      */
     @Bean
+    //依赖EhCacheManager的生命周期
+    @DependsOn("lifecycleBeanPostProcessor")
     public EhCacheManager ehCacheManager(){
        System.out.println("ShiroConfiguration.getEhCacheManager()");
        EhCacheManager cacheManager = new EhCacheManager();
@@ -168,5 +178,13 @@ public class ShiroConfiguration {
        return cookieRememberMeManager;
     }
     
-   
+    /**
+     * 管理EhCacheManager的生命周期，解决与devtool热部署的冲突。
+     * @return
+     */
+    @Bean(name = "lifecycleBeanPostProcessor")
+    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
+    	System.out.println("ShiroConfiguration--lifecycleBeanPostProcessor");
+    	return new LifecycleBeanPostProcessor();
+    }
 }
