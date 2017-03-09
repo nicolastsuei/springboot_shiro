@@ -14,8 +14,7 @@ import javax.persistence.ManyToMany;
 
 /**
  * 系统角色实体类;
- * @author Angel(QQ:412887952)
- * @version v.0.1
+ * 
  */
 @Entity
 public class SysRole implements Serializable{

@@ -28,26 +28,6 @@ Apache Shiro 核心通过 Filter 来实现，就好像SpringMvc 通过DispachSer
  */
 @Configuration
 public class ShiroConfiguration {
-	
-	/**
-	 * shiro权限主管理方法。
-	 * @return
-	 */
-	@Bean
-    public SecurityManager securityManager(){
-       DefaultWebSecurityManager securityManager =  new DefaultWebSecurityManager();
-       //设置realm.
-       securityManager.setRealm(myShiroRealm());
-       
-       //注入缓存管理器;
-       securityManager.setCacheManager(ehCacheManager());//这个如果执行多次，也是同样的一个对象;
-       
-       //注入记住我管理器;
-       securityManager.setRememberMeManager(rememberMeManager());
-       
-       return securityManager;
-    }
-	
 	/**
      * ShiroFilterFactoryBean 处理拦截资源文件问题。
      * 注意：单独一个ShiroFilterFactoryBean配置是或报错的，以为在
@@ -92,7 +72,26 @@ public class ShiroConfiguration {
        return shiroFilterFactoryBean;
     }
    
- /**
+    /**
+	 * shiro权限主管理方法。
+	 * @return
+	 */
+	@Bean
+    public SecurityManager securityManager(){
+       DefaultWebSecurityManager securityManager =  new DefaultWebSecurityManager();
+       //设置realm.
+       securityManager.setRealm(myShiroRealm());
+       
+       //注入缓存管理器;
+       securityManager.setCacheManager(ehCacheManager());//这个如果执行多次，也是同样的一个对象;
+       
+       //注入记住我管理器;
+       securityManager.setRememberMeManager(rememberMeManager());
+       
+       return securityManager;
+    }
+	
+	/**
      * 身份认证realm;
      * (这个需要自己写，账号密码校验；权限等)
      * @return
@@ -103,6 +102,7 @@ public class ShiroConfiguration {
        myShiroRealm.setCredentialsMatcher(hashedCredentialsMatcher());
        return myShiroRealm;
     }
+    
     /**
      * 凭证匹配器
      * （由于我们的密码校验交给Shiro的SimpleAuthenticationInfo进行处理了

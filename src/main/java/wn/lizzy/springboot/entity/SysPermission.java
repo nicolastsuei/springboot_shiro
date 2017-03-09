@@ -13,8 +13,7 @@ import javax.persistence.ManyToMany;
 
 /**
  * 权限实体类;
- * @author Angel(QQ:412887952)
- * @version v.0.1
+ 
  */
 @Entity
 public class SysPermission implements Serializable{
